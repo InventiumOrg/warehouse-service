@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS storage_room;
+DROP TABLE IF EXISTS warehouse;

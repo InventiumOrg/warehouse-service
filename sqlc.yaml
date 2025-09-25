@@ -1,0 +1,10 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "./models/query"
+    schema: "./models/migration"
+    gen:
+      go:
+        package: "models"
+        out: "models/sqlc"
+        sql_package: "pgx/v5"
