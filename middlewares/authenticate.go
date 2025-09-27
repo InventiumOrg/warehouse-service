@@ -1,13 +1,13 @@
 package middlewares
 
 import (
-	"log/slog"
-	"net/http"
-	"strings"
-	"github.com/clerk/clerk-sdk-go/v2/jwt"
+  "github.com/clerk/clerk-sdk-go/v2/jwt"
+  "log/slog"
+  "net/http"
+  "strings"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
+  "github.com/gin-gonic/gin"
+  "github.com/jackc/pgx/v5"
 )
 
 func ClerkAuth(db *pgx.Conn) gin.HandlerFunc {
@@ -15,9 +15,9 @@ func ClerkAuth(db *pgx.Conn) gin.HandlerFunc {
     authHeader := c.GetHeader("Authorization")
     if authHeader == "" {
       c.JSON(http.StatusUnauthorized, gin.H{
-        "error": "Unauthorized",
+        "error":   "Unauthorized",
         "message": "Authorization header required",
-    })
+      })
       slog.Error("Unable to get authorization header")
       c.Abort()
       return
@@ -37,9 +37,9 @@ func ClerkAuth(db *pgx.Conn) gin.HandlerFunc {
     })
     if err != nil {
       c.JSON(http.StatusUnauthorized, gin.H{
-        "error": "Unauthorized",
+        "error":   "Unauthorized",
         "message": "Invalid or expired token",
-        "detail": err.Error(),
+        "detail":  err.Error(),
       })
       slog.Error("User token is invalid: ", slog.Any("ERROR", err.Error()))
       c.Abort()
@@ -50,4 +50,3 @@ func ClerkAuth(db *pgx.Conn) gin.HandlerFunc {
     c.Next()
   }
 }
-

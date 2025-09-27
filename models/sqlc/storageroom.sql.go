@@ -7,32 +7,30 @@ package models
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createStorageRoom = `-- name: CreateStorageRoom :one
 INSERT INTO storage_room (
-    name, number, warehouse
+    name, number, warehouse_id
 ) VALUES (
     $1, $2, $3
-) RETURNING id, name, number, warehouse
+) RETURNING id, name, number, warehouse_id
 `
 
 type CreateStorageRoomParams struct {
-	Name      pgtype.Text
-	Number    pgtype.Int4
-	Warehouse pgtype.Text
+	Name        string
+	Number      string
+	WarehouseID int32
 }
 
 func (q *Queries) CreateStorageRoom(ctx context.Context, arg CreateStorageRoomParams) (StorageRoom, error) {
-	row := q.db.QueryRow(ctx, createStorageRoom, arg.Name, arg.Number, arg.Warehouse)
+	row := q.db.QueryRow(ctx, createStorageRoom, arg.Name, arg.Number, arg.WarehouseID)
 	var i StorageRoom
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Number,
-		&i.Warehouse,
+		&i.WarehouseID,
 	)
 	return i, err
 }
@@ -48,7 +46,7 @@ func (q *Queries) DeleteStorageRoom(ctx context.Context, id int32) error {
 }
 
 const getStorageRoom = `-- name: GetStorageRoom :one
-SELECT id, name, number, warehouse FROM storage_room
+SELECT id, name, number, warehouse_id FROM storage_room
 WHERE id = $1
 `
 
@@ -59,13 +57,13 @@ func (q *Queries) GetStorageRoom(ctx context.Context, id int32) (StorageRoom, er
 		&i.ID,
 		&i.Name,
 		&i.Number,
-		&i.Warehouse,
+		&i.WarehouseID,
 	)
 	return i, err
 }
 
 const listStorageRoom = `-- name: ListStorageRoom :many
-SELECT id, name, number, warehouse
+SELECT id, name, number, warehouse_id
 FROM storage_room
 LIMIT $1 OFFSET $2
 `
@@ -88,7 +86,7 @@ func (q *Queries) ListStorageRoom(ctx context.Context, arg ListStorageRoomParams
 			&i.ID,
 			&i.Name,
 			&i.Number,
-			&i.Warehouse,
+			&i.WarehouseID,
 		); err != nil {
 			return nil, err
 		}
@@ -104,16 +102,16 @@ const updateStorageRoom = `-- name: UpdateStorageRoom :one
 UPDATE storage_room
 SET name = $2,
     number = $3,
-    warehouse = $4
+    warehouse_id= $4
 WHERE id = $1
-RETURNING id, name, number, warehouse
+RETURNING id, name, number, warehouse_id
 `
 
 type UpdateStorageRoomParams struct {
-	ID        int32
-	Name      pgtype.Text
-	Number    pgtype.Int4
-	Warehouse pgtype.Text
+	ID          int32
+	Name        string
+	Number      string
+	WarehouseID int32
 }
 
 func (q *Queries) UpdateStorageRoom(ctx context.Context, arg UpdateStorageRoomParams) (StorageRoom, error) {
@@ -121,14 +119,14 @@ func (q *Queries) UpdateStorageRoom(ctx context.Context, arg UpdateStorageRoomPa
 		arg.ID,
 		arg.Name,
 		arg.Number,
-		arg.Warehouse,
+		arg.WarehouseID,
 	)
 	var i StorageRoom
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Number,
-		&i.Warehouse,
+		&i.WarehouseID,
 	)
 	return i, err
 }

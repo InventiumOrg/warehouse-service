@@ -4,22 +4,18 @@
 
 package models
 
-import (
-	"github.com/jackc/pgx/v5/pgtype"
-)
-
 type StorageRoom struct {
-	ID        int32
-	Name      pgtype.Text
-	Number    pgtype.Int4
-	Warehouse pgtype.Text
+	ID          int32
+	Name        string
+	Number      string
+	WarehouseID int32
 }
 
 type Warehouse struct {
-	ID       int32
+	ID       int64
 	Name     string
 	Address  string
-	Ward     int32
+	Ward     string
 	District string
 	City     string
 	Country  string

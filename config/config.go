@@ -3,20 +3,20 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	DBSource      string `mapstructure:"DB_SOURCE"`
-	ClerKKey      string `mapstructure:"CLERK_KEY"`
+  DBSource string `mapstructure:"DB_SOURCE"`
+  ClerKKey string `mapstructure:"CLERK_KEY"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
-	viper.AutomaticEnv()
+  viper.AddConfigPath(path)
+  viper.SetConfigName("app")
+  viper.SetConfigType("env")
+  viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
-	}
-	viper.Unmarshal(&config)
-	return config, nil
+  err = viper.ReadInConfig()
+  if err != nil {
+    return
+  }
+  viper.Unmarshal(&config)
+  return config, nil
 }

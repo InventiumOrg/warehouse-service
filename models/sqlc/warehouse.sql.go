@@ -20,7 +20,7 @@ INSERT INTO warehouse (
 type CreateWarehouseParams struct {
 	Name     string
 	Address  string
-	Ward     int32
+	Ward     string
 	District string
 	City     string
 	Country  string
@@ -53,7 +53,7 @@ DELETE FROM warehouse
 WHERE id = $1
 `
 
-func (q *Queries) DeleteWarehouse(ctx context.Context, id int32) error {
+func (q *Queries) DeleteWarehouse(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteWarehouse, id)
 	return err
 }
@@ -63,7 +63,7 @@ SELECT id, name, address, ward, district, city, country FROM warehouse
 WHERE id = $1
 `
 
-func (q *Queries) GetWarehouse(ctx context.Context, id int32) (Warehouse, error) {
+func (q *Queries) GetWarehouse(ctx context.Context, id int64) (Warehouse, error) {
 	row := q.db.QueryRow(ctx, getWarehouse, id)
 	var i Warehouse
 	err := row.Scan(
@@ -130,10 +130,10 @@ RETURNING id, name, address, ward, district, city, country
 `
 
 type UpdateWarehouseParams struct {
-	ID       int32
+	ID       int64
 	Name     string
 	Address  string
-	Ward     int32
+	Ward     string
 	District string
 	City     string
 	Country  string

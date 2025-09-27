@@ -1,0 +1,13 @@
+{
+  "editor": {
+    "tabSize": 2,
+    "insertSpaces": false,
+    "formatOnSave": true,
+    "formatOnType": false
+  },
+  "go": {
+    "formatTool": "gofmt",
+    "lintOnSave": true,
+    "buildOnSave": false
+  }
+}
