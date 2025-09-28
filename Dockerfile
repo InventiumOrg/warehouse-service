@@ -12,4 +12,4 @@ RUN ls -lhR .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o ./warehouse-service .
 
-CMD ["/warehouse-service"]
+CMD ["./warehouse-service"]
