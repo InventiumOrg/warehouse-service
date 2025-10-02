@@ -54,7 +54,13 @@ func NewServer(db *pgx.Conn) *Server {
     MaxAge:           12 * time.Hour,
   }))
 
+  // Add health check routes (no auth required)
+  s.routes.AddHealthRoutes(s.router)
+  
+  // Add business logic routes
   s.routes.AddWarehouseRoutes(s.router)
+  s.routes.AddStorageRoomRoutes(s.router)
+  
   return s.router.Run(addr)
 }
 

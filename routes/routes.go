@@ -49,3 +49,9 @@ func (r *Route) AddStorageRoomRoutes(router *gin.Engine) {
     }
   }
 }
+
+func (r *Route) AddHealthRoutes(router *gin.Engine) {
+  // Health check endpoints (no authentication required)
+  router.GET("/healthz", r.handlers.HealthzHandler)
+  router.GET("/readyz", r.handlers.ReadyzHandler)
+}
