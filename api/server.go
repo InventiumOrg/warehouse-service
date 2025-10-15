@@ -40,7 +40,7 @@ func NewServer(db *pgx.Conn) *Server {
   return server
   }
 
-  func (s *Server) Run(addr string) error {
+func (s *Server) Run(addr string) error {
   s.router.SetTrustedProxies(nil)
 
   // Add OpenTelemetry middleware
