@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	models "warehouse-service/models/sqlc"
+	"warehouse-service/observability"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -15,16 +16,18 @@ import (
 )
 
 type Handlers struct {
-	db      *pgx.Conn
-	queries *models.Queries
-	tracer  trace.Tracer
+	db              *pgx.Conn
+	queries         *models.Queries
+	tracer          trace.Tracer
+	businessMetrics *observability.BusinessMetrics
 }
 
-func NewHandlers(db *pgx.Conn) *Handlers {
+func NewHandlers(db *pgx.Conn, businessMetrics *observability.BusinessMetrics) *Handlers {
 	return &Handlers{
-		db:      db,
-		queries: models.New(db),
-		tracer:  otel.Tracer("warehouse-service/handlers"),
+		db:              db,
+		queries:         models.New(db),
+		tracer:          otel.Tracer("warehouse-service/handlers"),
+		businessMetrics: businessMetrics,
 	}
 }
 
@@ -46,14 +49,24 @@ func (h *Handlers) GetStorageRoom(ctx *gin.Context) {
 	}
 	storageRoom, err := h.queries.GetStorageRoom(ctx, int32(id))
 	if err != nil {
-		slog.Error("Got an error while getting inventories: ", slog.Any(err.Error(), "err"))
+		slog.Error("Got an error while getting storage room: ", slog.Any("err", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to get storage room",
+		})
+		// Record error metric
+		if h.businessMetrics != nil {
+			h.businessMetrics.DBOperationErrors.Add(ctx, 1)
+		}
 	} else {
 		ctx.JSON(200, gin.H{
 			"message": "Get Storage Room Successfully",
 			"data":    storageRoom,
 		})
+		// Record success metric
+		if h.businessMetrics != nil {
+			h.businessMetrics.StorageRoomRetrievals.Add(ctx, 1)
+		}
 	}
-
 }
 
 func (h *Handlers) ListStorageRoom(ctx *gin.Context) {
@@ -219,6 +232,10 @@ func (h *Handlers) CreateStorageRoom(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to create storage room",
 		})
+		// Record error metric
+		if h.businessMetrics != nil {
+			h.businessMetrics.DBOperationErrors.Add(ctx, 1)
+		}
 		return
 	}
 
@@ -226,6 +243,10 @@ func (h *Handlers) CreateStorageRoom(ctx *gin.Context) {
 		"message": "Create Storage Room Successfully",
 		"data":    storageRoom,
 	})
+	// Record success metric
+	if h.businessMetrics != nil {
+		h.businessMetrics.StorageRoomCreated.Add(ctx, 1)
+	}
 }
 
 func (h *Handlers) DeleteStorageRoom(ctx *gin.Context) {
