@@ -11,7 +11,7 @@ migratedown:
 sqlc:
 	sqlc generate --no-remote
 loaddata:
-	PGPASSWORD=secret psql -h localhost -U root -d inventium -f data/sql/inventium.sql
+	PGPASSWORD=secret psql -h localhost -U root -d warehouse-service -f data/sql/inventium.sql
 runcontainer:
 	podman run --network inventium --name warehouse-service -p 7450:7450 -d -e DB_SOURCE="$(DB_SOURCE)" -e CLERK_KEY="$(CLERK_KEY)" warehouse-service:1.0.0
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc loaddata runcontainer

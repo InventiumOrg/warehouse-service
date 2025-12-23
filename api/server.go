@@ -15,12 +15,12 @@ import (
 )
 
 type Server struct {
-	router          *gin.Engine
-	routes          *routes.Route
-	db              *pgx.Conn
-	otelShutdown    func(context.Context) error
-	metrics         *observability.AppMetrics
-	businessMetrics *observability.BusinessMetrics
+	router            *gin.Engine
+	routes            *routes.Route
+	db                *pgx.Conn
+	otelShutdown      func(context.Context) error
+	metrics           *observability.AppMetrics
+	prometheusMetrics *observability.PrometheusMetrics
 }
 
 func NewServer(db *pgx.Conn, serviceName, serviceVersion, otelEndpoint, otelHeaders string) *Server {
@@ -39,21 +39,21 @@ func NewServer(db *pgx.Conn, serviceName, serviceVersion, otelEndpoint, otelHead
 		slog.Error("Failed to create metrics", slog.Any("error", err))
 	}
 
-	// Create business metrics
-	businessMetrics, err := observability.CreateBusinessMetrics()
-	if err != nil {
-		slog.Error("Failed to create business metrics", slog.Any("error", err))
-	}
+	// Create Prometheus metrics
+	prometheusMetrics := observability.NewPrometheusMetrics(serviceName)
 
 	router := gin.Default()
 
+	// Add Prometheus middleware
+	router.Use(prometheusMetrics.PrometheusMiddleware())
+
 	// Add metrics middleware
 	server := &Server{
-		router:          router,
-		db:              db,
-		otelShutdown:    otelShutdown,
-		metrics:         metrics,
-		businessMetrics: businessMetrics,
+		router:            router,
+		db:                db,
+		otelShutdown:      otelShutdown,
+		metrics:           metrics,
+		prometheusMetrics: prometheusMetrics,
 	}
 
 	// Add middleware
@@ -66,7 +66,7 @@ func NewServer(db *pgx.Conn, serviceName, serviceVersion, otelEndpoint, otelHead
 		MaxAge:           12 * time.Hour,
 	}))
 	// Setup routes
-	server.routes = routes.NewRoute(db, businessMetrics)
+	server.routes = routes.NewRoute(db, prometheusMetrics)
 
 	return server
 }
@@ -81,9 +81,11 @@ func (s *Server) Run(addr string, serviceName string) error {
 	// Add health check routes (no auth required)
 	s.routes.AddHealthRoutes(s.router)
 
+	// Add Prometheus metrics endpoint
+	observability.SetupPrometheusEndpoint(s.router)
+
 	// Add business logic routes
 	s.routes.AddWarehouseRoutes(s.router)
-	s.routes.AddStorageRoomRoutes(s.router)
 
 	return s.router.Run(addr)
 }
