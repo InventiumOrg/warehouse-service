@@ -1,0 +1,20 @@
+# In each microservice repo
+steps:
+  - label: ":pipeline: Load centralized pipelines"
+    command: |
+      echo "Cloning centralized pipeline repository..."
+      git clone --depth 1 https://github.com/InventiumOrg/buildkite-cicd.git /tmp/cicd
+      
+      echo "Verifying templates exist..."
+      ls -la /tmp/cicd/templates/
+      
+      echo "Uploading code linter pipeline..."
+      buildkite-agent pipeline upload /tmp/cicd/templates/code-linter.yml
+      
+      echo "Uploading security scan pipeline..."
+      buildkite-agent pipeline upload /tmp/cicd/templates/security-scan.yml
+      
+      echo "Uploading image build pipeline..."
+      buildkite-agent pipeline upload /tmp/cicd/templates/image-build.yml
+      
+      echo "All pipelines loaded successfully!"
