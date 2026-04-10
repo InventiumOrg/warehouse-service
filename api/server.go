@@ -23,7 +23,7 @@ type Server struct {
 	prometheusMetrics *observability.PrometheusMetrics
 }
 
-func NewServer(db *pgx.Conn, serviceName, serviceVersion, otelEndpoint, otelHeaders string) *Server {
+func NewServer(db *pgx.Conn, serviceName, serviceVersion, otelEndpoint, otelHeaders string, corsAllowOrigins []string) *Server {
 	// Setup OpenTelemetry
 	ctx := context.Background()
 	otelShutdown, err := observability.SetupOTelSDK(ctx, serviceName, serviceVersion, otelEndpoint, otelHeaders)
@@ -59,7 +59,7 @@ func NewServer(db *pgx.Conn, serviceName, serviceVersion, otelEndpoint, otelHead
 	// Add middleware
 	router.Use(server.metricsMiddleware())
 	server.router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     corsAllowOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origins", "Content-Type", "Authorization", "Bearer"},
 		AllowCredentials: true,
