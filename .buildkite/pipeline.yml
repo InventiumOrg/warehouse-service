@@ -18,3 +18,10 @@ steps:
       buildkite-agent pipeline upload /tmp/cicd/templates/image-build.yml
       
       echo "All pipelines loaded successfully!"
+
+notify:
+  - slack:
+      channels:
+        - "#im-devx-squad"
+      message: ":red_circle: Build *${BUILDKITE_PIPELINE_SLUG}* failed on branch *${BUILDKITE_BRANCH}*"
+    if: build.state == "failed"

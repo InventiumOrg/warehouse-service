@@ -76,7 +76,11 @@ func (s *Server) Run(addr string, serviceName string) error {
 		slog.String("address", addr),
 		slog.String("service", serviceName))
 
-	s.router.SetTrustedProxies(nil)
+	err := s.router.SetTrustedProxies(nil)
+	if err != nil {
+		slog.Error("Failed to set trusted proxies", slog.Any("error", err))
+		return err
+	}
 
 	// Add health check routes (no auth required)
 	s.routes.AddHealthRoutes(s.router)
@@ -102,7 +106,10 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	}
 
 	if s.db != nil {
-		s.db.Close(ctx)
+		if err := s.db.Close(ctx); err != nil {
+			slog.Error("Failed to close database connection", slog.Any("error", err))
+			return err
+		}
 	}
 
 	return nil
