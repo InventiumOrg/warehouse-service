@@ -154,7 +154,11 @@ func (h *Handlers) UpdateWarehouse(ctx *gin.Context) {
 		})
 		return
 	}
-	defer tx.Rollback(ctx) // This will be ignored if tx.Commit() succeeds
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
+			slog.Error("Failed to rollback transaction", slog.Any("err", err.Error()))
+		}
+	}() // Rollback is a no-op after Commit()
 
 	// Create queries with transaction
 	qtx := h.queries.WithTx(tx)

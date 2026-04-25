@@ -186,7 +186,7 @@ func (h *OTLPHandler) sendToOTLP(record slog.Record) {
 	if err != nil {
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 }
 
 // slogLevelToOTLP converts slog level to OTLP severity number
